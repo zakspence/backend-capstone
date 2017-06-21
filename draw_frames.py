@@ -37,16 +37,16 @@ def main():
     colors = [ImageColor.getrgb(color) for color in colors]
         
     #make path in which to save frames
-    frames_dir = Path('frames')
+    frames_dir = Path('frames.01')
     if not frames_dir.exists():
         frames_dir.mkdir()
         
     save_folder = os.path.join(os.getcwd(), frames_dir)
 
     # make an 1000x1000 pixel image
-    im = Image.new("RGB", (1001, 1001), 'white')
-    pix = im.load()
-
+    working_frame = Image.new("RGB", (1001, 1001), 'white')
+    pix = working_frame.load()
+    
     # Write all pixel placements for that timestamp
     current_second = tiles.iloc[0]['ts']
     start_time = time()
@@ -54,25 +54,23 @@ def main():
     for i in range(len(tiles)):
 
         # once we move to the next second of our dataset
-        # Save this image file, then create new one
+        # Save this image file, then move on.
 
         if tiles.iloc[i]['ts'] != current_second:
             filename = '{}.png'.format(str(current_second))
             file_path = os.path.join(save_folder, filename) 
-            im.save(file_path, "PNG")
+            working_frame.save(file_path, "PNG")
             current_second = tiles.iloc[i]['ts']
-            im = Image.new("RGB", (1001, 1001), 'white')
-            pix = im.load()
         
         x = int(tiles.iloc[i]['x'])
         y = int(tiles.iloc[i]['y'])
         color = int(tiles.iloc[i]['color'])
         pix[x,y] = colors[color]
-            
+        
         if i + 1 ==  len(tiles):
             filename = '{}.png'.format(str(current_second))
             file_path = os.path.join(save_folder, filename) 
-            im.save(file_path, "PNG")
+            working_frame.save(file_path, "PNG")
             break
 
     print('All done. Took this long: {}'.format(time() - start_time))
