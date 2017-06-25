@@ -11,6 +11,11 @@ import pandas as pd
 import os
 from time import time
 
+def save_frame(timestamp, directory, frame):
+    filename = '{}.png'.format(str(timestamp))
+    file_path = os.path.join(directory, filename)
+    frame.save(file_path, 'PNG')
+
 def main():
     with open('sorted_tiles.csv', 'r') as rptp:
         tiles = pd.read_csv(rptp)
@@ -37,7 +42,7 @@ def main():
     colors = [ImageColor.getrgb(color) for color in colors]
         
     #make path in which to save frames
-    frames_dir = Path('frames.01')
+    frames_dir = Path('frames.02')
     if not frames_dir.exists():
         frames_dir.mkdir()
         
@@ -57,23 +62,18 @@ def main():
         # Save this image file, then move on.
 
         if tiles.iloc[i]['ts'] != current_second:
-            filename = '{}.png'.format(str(current_second))
-            file_path = os.path.join(save_folder, filename) 
-            working_frame.save(file_path, "PNG")
+            save_frame(current_second, save_folder, working_frame)
             current_second = tiles.iloc[i]['ts']
-        
+
         x = int(tiles.iloc[i]['x'])
         y = int(tiles.iloc[i]['y'])
         color = int(tiles.iloc[i]['color'])
         pix[x,y] = colors[color]
-        
-        if i + 1 ==  len(tiles):
-            filename = '{}.png'.format(str(current_second))
-            file_path = os.path.join(save_folder, filename) 
-            working_frame.save(file_path, "PNG")
-            break
 
+    save_frame(current_second, save_folder, working_frame)
+        
     print('All done. Took this long: {}'.format(time() - start_time))
+
 if __name__ == '__main__':
     main()
 
