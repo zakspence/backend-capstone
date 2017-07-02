@@ -1,8 +1,5 @@
 '''
-The following snippet writes a .png representing each second of r/place.
-
-Perhaps a more useful version would be one in which, given a time, 
-we generate the image at that time as a .png and send it as a view.
+The following snippet writes a .png for each second of data in Reddit's r/place.
 '''
 
 from PIL import Image, ImageColor
@@ -10,6 +7,11 @@ from pathlib import Path
 import pandas as pd
 import os
 from time import time
+
+def save_frame(timestamp, directory, frame):
+    filename = '{}.png'.format(str(timestamp))
+    file_path = os.path.join(directory, filename)
+    frame.save(file_path, 'PNG')
 
 def main():
     with open('sorted_tiles.csv', 'r') as rptp:
@@ -37,16 +39,16 @@ def main():
     colors = [ImageColor.getrgb(color) for color in colors]
         
     #make path in which to save frames
-    frames_dir = Path('frames')
+    frames_dir = Path('frames.02')
     if not frames_dir.exists():
         frames_dir.mkdir()
         
     save_folder = os.path.join(os.getcwd(), frames_dir)
 
     # make an 1000x1000 pixel image
-    im = Image.new("RGB", (1001, 1001), 'white')
-    pix = im.load()
-
+    working_frame = Image.new("RGB", (1001, 1001), 'white')
+    pix = working_frame.load()
+    
     # Write all pixel placements for that timestamp
     current_second = tiles.iloc[0]['ts']
     start_time = time()
@@ -54,28 +56,21 @@ def main():
     for i in range(len(tiles)):
 
         # once we move to the next second of our dataset
-        # Save this image file, then create new one
+        # Save this image file, then move on.
 
         if tiles.iloc[i]['ts'] != current_second:
-            filename = '{}.png'.format(str(current_second))
-            file_path = os.path.join(save_folder, filename) 
-            im.save(file_path, "PNG")
+            save_frame(current_second, save_folder, working_frame)
             current_second = tiles.iloc[i]['ts']
-            im = Image.new("RGB", (1001, 1001), 'white')
-            pix = im.load()
-        
+
         x = int(tiles.iloc[i]['x'])
         y = int(tiles.iloc[i]['y'])
         color = int(tiles.iloc[i]['color'])
         pix[x,y] = colors[color]
-            
-        if i + 1 ==  len(tiles):
-            filename = '{}.png'.format(str(current_second))
-            file_path = os.path.join(save_folder, filename) 
-            im.save(file_path, "PNG")
-            break
 
+    save_frame(current_second, save_folder, working_frame)
+        
     print('All done. Took this long: {}'.format(time() - start_time))
+
 if __name__ == '__main__':
     main()
 
