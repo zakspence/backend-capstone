@@ -1,8 +1,5 @@
 '''
-The following snippet writes a .png representing each second of r/place.
-
-Perhaps a more useful version would be one in which, given a time, 
-we generate the image at that time as a .png and send it as a view.
+The following snippet writes a .png for each second of data in Reddit's r/place.
 '''
 
 from PIL import Image, ImageColor
